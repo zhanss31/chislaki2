@@ -1,0 +1,98 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import plotly.graph_objects as gr
+from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import axes3d
+from sympy import *
+
+def heaviside(x1):
+    return 1*(x1>0)
+
+def phi_1(x1):
+    return heaviside(x1-1)*heaviside(2-x1)
+def a1(u=1):
+    return 1
+def f1(u):
+    return a1()*u
+
+def phi_2(x1):
+    return math.pow(math.sin(3.14*x1/2),2)*heaviside(x1)*heaviside(2-x1)
+def a2(u):
+    return u
+def f2(u):
+    return u*u/2
+
+def phi_3(x1):
+    return math.cos(3.14*x1-1.5)*heaviside(x1)*heaviside(0.7278-x1)+math.sin(3.14*x1-1.5)*heaviside(x1-0.7278)*heaviside(1.2168-x1)+math.sin(3.14*x1-3)*heaviside(x1-1.2168)*heaviside(1.9559-x1)
+def a3(u):
+    return 1/(u+1)
+def f3(u):
+    return math.log(u+1)
+
+# условие устойчивости Куранта
+def Kurant_condition(layer, h, a, c=0.9):
+    a_max = max([a(u) for u in layer])
+    T = c * h / a_max
+
+    return T
+
+def solution(phi,a,f):
+    u = []
+    h=0.01
+    x_plot = np.linspace(0, 10, 1000)
+    u0 = [phi(i) for i in x_plot]
+    u.append(u0)
+
+    ti=0
+    t_end=1
+    while ti<t_end:
+        T=Kurant_condition(u[-1],h,a)
+        u01 = []
+        u01.append(0)
+        for i in range(1,len(x_plot)-1):
+            u01.append((u[-1][i+1]+u[-1][i-1])/2-T*(f(u[-1][i+1])-f(u[-1][i-1]))/(2*h))
+        u01.append(0)
+        u.append(u01)
+        ti=ti+T
+    return u
+
+A1=solution(phi_1,a1,f1)
+A2= solution(phi_2,a2,f2)
+A3=solution(phi_3,a3,f3)
+
+h=0.01
+x_plot = np.linspace(0, 10, 1000)
+
+fig = plt.figure()
+ax = fig.add_subplot(1,5,1)
+ax.plot(x_plot, A3[3], color="green")
+ax.set_title('шаг 3')
+ax.set_xlabel('ось X')
+ax.set_ylabel('ось U')
+
+ax1 = fig.add_subplot(1,5,2)
+ax1.plot(x_plot, A3[8], color="green")
+ax1.set_title('шаг 8')
+ax1.set_xlabel('ось X')
+ax1.set_ylabel('ось U')
+
+ax2 = fig.add_subplot(1,5,3)
+ax2.plot(x_plot, A3[16], color="green")
+ax2.set_title('шаг 16')
+ax2.set_xlabel('ось X')
+ax2.set_ylabel('ось U')
+
+ax3 = fig.add_subplot(1,5,4)
+ax3.plot(x_plot, A3[20], color="green")
+ax3.set_title('шаг 20')
+ax3.set_xlabel('ось X')
+ax3.set_ylabel('ось U')
+
+ax3 = fig.add_subplot(1,5,5)
+ax3.plot(x_plot, A3[110], color="green")
+ax3.set_title('шаг 110')
+ax3.set_xlabel('ось X')
+ax3.set_ylabel('ось U')
+
+plt.show()
