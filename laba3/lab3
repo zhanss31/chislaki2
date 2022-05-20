@@ -111,8 +111,6 @@ x_plot = np.linspace(0, 2, 200)
 ress=[]
 while temp<=t_end:
     t_plot = np.linspace(0, temp, 200)
-
-    plt.grid()
     result = solution(x_plot,t_plot)[-1]
     ress.append(result)
     temp = temp+0.2
